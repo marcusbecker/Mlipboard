@@ -18,14 +18,21 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.stream.FileImageOutputStream;
 import javax.swing.ImageIcon;
-import javax.swing.SwingUtilities;
+import javax.swing.JTabbedPane;
 import javax.swing.Timer;
 
 /**
@@ -35,11 +42,15 @@ import javax.swing.Timer;
 public class Window extends javax.swing.JFrame {
 
     private int count;
-    private Timer timer;
+    private final Timer timer;
     private Robot robo;
     private final Clipboard clipboard;
 
     private Toolkit toolkit = Toolkit.getDefaultToolkit();
+    private final static int FILE_TAB = 0;
+    private final static int IMAGE_TAB = 1;
+
+    private static final List<ImageIcon> images = new ArrayList<>(20);
 
     /**
      * Creates new form Window
@@ -55,7 +66,7 @@ public class Window extends javax.swing.JFrame {
         clipboard = toolkit.getSystemClipboard();
 
         Integer val = (Integer) printTimer.getValue();
-        
+
         timer = new Timer(val, new ActionListener() {
 
             @Override
@@ -77,9 +88,6 @@ public class Window extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        sp = new javax.swing.JScrollPane();
-        taResult = new javax.swing.JTextArea();
-        lblImage = new javax.swing.JLabel();
         cbAutoLoad = new javax.swing.JCheckBox();
         cbAutoPrint = new javax.swing.JCheckBox();
         btnPrint = new javax.swing.JButton();
@@ -87,6 +95,13 @@ public class Window extends javax.swing.JFrame {
         btnClear = new javax.swing.JButton();
         cbHideWindow = new javax.swing.JCheckBox();
         printTimer = new javax.swing.JSpinner();
+        jTabbedPane = new javax.swing.JTabbedPane();
+        pnText = new javax.swing.JPanel();
+        sp = new javax.swing.JScrollPane();
+        taResult = new javax.swing.JTextArea();
+        pnImage = new javax.swing.JPanel();
+        lblImage = new javax.swing.JLabel();
+        cbQuality = new javax.swing.JComboBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Meu Clipboard");
@@ -97,13 +112,6 @@ public class Window extends javax.swing.JFrame {
             public void windowLostFocus(java.awt.event.WindowEvent evt) {
             }
         });
-
-        taResult.setColumns(20);
-        taResult.setRows(5);
-        sp.setViewportView(taResult);
-
-        lblImage.setBackground(new java.awt.Color(102, 204, 255));
-        lblImage.setOpaque(true);
 
         cbAutoLoad.setText("Auto load");
 
@@ -145,30 +153,77 @@ public class Window extends javax.swing.JFrame {
             }
         });
 
+        taResult.setColumns(20);
+        taResult.setRows(5);
+        sp.setViewportView(taResult);
+
+        javax.swing.GroupLayout pnTextLayout = new javax.swing.GroupLayout(pnText);
+        pnText.setLayout(pnTextLayout);
+        pnTextLayout.setHorizontalGroup(
+            pnTextLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnTextLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(sp, javax.swing.GroupLayout.DEFAULT_SIZE, 675, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        pnTextLayout.setVerticalGroup(
+            pnTextLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnTextLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(sp, javax.swing.GroupLayout.DEFAULT_SIZE, 582, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jTabbedPane.addTab("Plain text", pnText);
+
+        lblImage.setBackground(new java.awt.Color(102, 204, 255));
+        lblImage.setOpaque(true);
+
+        javax.swing.GroupLayout pnImageLayout = new javax.swing.GroupLayout(pnImage);
+        pnImage.setLayout(pnImageLayout);
+        pnImageLayout.setHorizontalGroup(
+            pnImageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnImageLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblImage, javax.swing.GroupLayout.DEFAULT_SIZE, 675, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        pnImageLayout.setVerticalGroup(
+            pnImageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnImageLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblImage, javax.swing.GroupLayout.DEFAULT_SIZE, 582, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jTabbedPane.addTab("Screen Images", pnImage);
+
+        cbQuality.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%" }));
+        cbQuality.setToolTipText("Image quality");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblImage, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(sp, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 680, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(cbAutoLoad)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnPaste, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cbAutoPrint)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(printTimer, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cbHideWindow)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnPrint)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnClear)))
-                .addContainerGap())
+                .addComponent(cbAutoLoad)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnPaste, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cbAutoPrint)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(printTimer, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cbHideWindow)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnPrint)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cbQuality, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnClear)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jTabbedPane)
         );
 
         layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnPaste, btnPrint});
@@ -176,11 +231,8 @@ public class Window extends javax.swing.JFrame {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(sp, javax.swing.GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblImage, javax.swing.GroupLayout.DEFAULT_SIZE, 314, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 632, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cbAutoLoad)
                     .addComponent(btnPaste)
@@ -188,7 +240,8 @@ public class Window extends javax.swing.JFrame {
                     .addComponent(cbAutoPrint)
                     .addComponent(btnClear)
                     .addComponent(cbHideWindow)
-                    .addComponent(printTimer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(printTimer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cbQuality, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -252,7 +305,8 @@ public class Window extends javax.swing.JFrame {
 
             Dimension screenSize = toolkit.getScreenSize();
             BufferedImage print = robo.createScreenCapture(new Rectangle(screenSize));
-            pasteImage(print);
+            pasteImageCompressed(print);
+            setTab(IMAGE_TAB);
 
             if (hide) {
                 this.setVisible(true);
@@ -260,18 +314,26 @@ public class Window extends javax.swing.JFrame {
         }
     }
 
+    private JTabbedPane setTab(int tab) {
+        jTabbedPane.setSelectedIndex(tab);
+        return jTabbedPane;
+    }
+
     private void paste() {
         try {
             if (clipboard.isDataFlavorAvailable(DataFlavor.stringFlavor)) {
                 taResult.append("\n");
                 taResult.append(clipboard.getData(DataFlavor.stringFlavor).toString());
+                setTab(FILE_TAB);
 
             } else if (clipboard.isDataFlavorAvailable(DataFlavor.javaFileListFlavor)) {
                 List<File> files = (List<File>) clipboard.getData(DataFlavor.javaFileListFlavor);
                 pasteFiles(files);
+                setTab(FILE_TAB);
 
             } else if (clipboard.isDataFlavorAvailable(DataFlavor.imageFlavor)) {
-                pasteImage((BufferedImage) clipboard.getData(DataFlavor.imageFlavor));
+                setTab(IMAGE_TAB);
+                pasteImageCompressed((BufferedImage) clipboard.getData(DataFlavor.imageFlavor));
             }
 
         } catch (UnsupportedFlavorException | IOException ufe) {
@@ -279,17 +341,62 @@ public class Window extends javax.swing.JFrame {
         }
     }
 
-    private void pasteImage(BufferedImage image) {
-        int nl = lblImage.getWidth(); //Math.round((float) image.getWidth() / image.getHeight() * lblImage.getWidth());
-        int na = lblImage.getHeight();//Math.round((float) image.getHeight() / image.getWidth() * lblImage.getHeight());
+    private void pasteImageCompressed(BufferedImage image) {
+        createIcon(image);
 
-        //BufferedImage resizeImage = new BufferedImage(lblImage.getWidth(), lblImage.getHeight(), BufferedImage.TYPE_INT_RGB);
-        BufferedImage resizeImage = new BufferedImage(nl, na, BufferedImage.TYPE_INT_RGB);
+        final File fImg = new File("imagem_" + count + ".jpg");
+
+        try {
+            String val = cbQuality.getSelectedItem().toString().replaceAll("%", "");
+            float quality = Float.parseFloat(val) / 100f;
+
+            JPEGImageWriteParam jpegParams = new JPEGImageWriteParam(null);
+            jpegParams.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+            jpegParams.setCompressionQuality(quality);
+
+            final ImageWriter writer = ImageIO.getImageWritersByFormatName("jpg").next();
+            final FileImageOutputStream fios = new FileImageOutputStream(fImg);
+            writer.setOutput(fios);
+            writer.write(null, new IIOImage(image, null, null), jpegParams);
+            writer.dispose();
+            fios.close();
+
+            count++;
+            taResult.append("\nImagem salva em: " + fImg.getAbsolutePath());
+
+        } catch (IOException ex) {
+            Logger.getLogger(Window.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void createIcon(BufferedImage image) {
+        // with and height
+        final int w = image.getWidth();
+        final int h = image.getHeight();
+
+        //new width and height
+        int nw = lblImage.getWidth();
+        int nh = lblImage.getHeight();
+
+        if (w > h) {
+            nh = h * nw / w;
+        } else {
+            nw = w * nh / h;
+        }
+        
+        BufferedImage resizeImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
         Graphics g = resizeImage.createGraphics();
-        //g.drawImage(image, 0, 0, lblImage.getWidth(), lblImage.getHeight(), null);
-        g.drawImage(image, 0, 0, nl, na, null);
+        g.drawImage(image, 0, 0, nw, nh, null);
         g.dispose();
-        lblImage.setIcon(new ImageIcon(resizeImage));
+
+        final ImageIcon ico = new ImageIcon(resizeImage);
+        images.add(ico);
+        lblImage.setIcon(ico);
+    }
+
+    private void pasteImage(BufferedImage image) {
+        createIcon(image);
 
         File fImg = new File("imagem_" + count + ".jpg");
         try {
@@ -348,7 +455,11 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JCheckBox cbAutoLoad;
     private javax.swing.JCheckBox cbAutoPrint;
     private javax.swing.JCheckBox cbHideWindow;
+    private javax.swing.JComboBox cbQuality;
+    private javax.swing.JTabbedPane jTabbedPane;
     private javax.swing.JLabel lblImage;
+    private javax.swing.JPanel pnImage;
+    private javax.swing.JPanel pnText;
     private javax.swing.JSpinner printTimer;
     private javax.swing.JScrollPane sp;
     private javax.swing.JTextArea taResult;

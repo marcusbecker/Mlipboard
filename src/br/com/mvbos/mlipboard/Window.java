@@ -9,6 +9,7 @@ import java.awt.AWTException;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.HeadlessException;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
@@ -18,7 +19,6 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +32,7 @@ import javax.imageio.ImageWriter;
 import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.swing.ImageIcon;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.Timer;
 
@@ -49,6 +50,9 @@ public class Window extends javax.swing.JFrame {
     private Toolkit toolkit = Toolkit.getDefaultToolkit();
     private final static int FILE_TAB = 0;
     private final static int IMAGE_TAB = 1;
+
+    private ImageIcon icon;
+    private BufferedImage lastIcon;
 
     private static final List<ImageIcon> images = new ArrayList<>(20);
 
@@ -88,20 +92,20 @@ public class Window extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        cbAutoLoad = new javax.swing.JCheckBox();
-        cbAutoPrint = new javax.swing.JCheckBox();
-        btnPrint = new javax.swing.JButton();
-        btnPaste = new javax.swing.JButton();
-        btnClear = new javax.swing.JButton();
-        cbHideWindow = new javax.swing.JCheckBox();
-        printTimer = new javax.swing.JSpinner();
         jTabbedPane = new javax.swing.JTabbedPane();
         pnText = new javax.swing.JPanel();
         sp = new javax.swing.JScrollPane();
         taResult = new javax.swing.JTextArea();
-        pnImage = new javax.swing.JPanel();
-        lblImage = new javax.swing.JLabel();
+        pnImage = createPanel();
+        pnBottomBar = new javax.swing.JPanel();
+        cbAutoLoad = new javax.swing.JCheckBox();
+        btnPaste = new javax.swing.JButton();
+        cbAutoPrint = new javax.swing.JCheckBox();
+        printTimer = new javax.swing.JSpinner();
+        cbHideWindow = new javax.swing.JCheckBox();
+        btnPrint = new javax.swing.JButton();
         cbQuality = new javax.swing.JComboBox();
+        btnClear = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Meu Clipboard");
@@ -112,44 +116,9 @@ public class Window extends javax.swing.JFrame {
             public void windowLostFocus(java.awt.event.WindowEvent evt) {
             }
         });
-
-        cbAutoLoad.setText("Auto load");
-
-        cbAutoPrint.setText("Auto Print");
-        cbAutoPrint.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbAutoPrintActionPerformed(evt);
-            }
-        });
-
-        btnPrint.setText("Print and Save");
-        btnPrint.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPrintActionPerformed(evt);
-            }
-        });
-
-        btnPaste.setText("Paste");
-        btnPaste.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPasteActionPerformed(evt);
-            }
-        });
-
-        btnClear.setText("Clear");
-        btnClear.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnClearActionPerformed(evt);
-            }
-        });
-
-        cbHideWindow.setText("Hide on print");
-
-        printTimer.setToolTipText("Number of shots per second");
-        printTimer.setValue(1);
-        printTimer.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                printTimerStateChanged(evt);
+        addWindowStateListener(new java.awt.event.WindowStateListener() {
+            public void windowStateChanged(java.awt.event.WindowEvent evt) {
+                formWindowStateChanged(evt);
             }
         });
 
@@ -170,42 +139,75 @@ public class Window extends javax.swing.JFrame {
             pnTextLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnTextLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(sp, javax.swing.GroupLayout.DEFAULT_SIZE, 582, Short.MAX_VALUE)
+                .addComponent(sp, javax.swing.GroupLayout.DEFAULT_SIZE, 566, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         jTabbedPane.addTab("Plain text", pnText);
 
-        lblImage.setBackground(new java.awt.Color(102, 204, 255));
-        lblImage.setOpaque(true);
+        pnImage.setBackground(new java.awt.Color(51, 204, 255));
 
         javax.swing.GroupLayout pnImageLayout = new javax.swing.GroupLayout(pnImage);
         pnImage.setLayout(pnImageLayout);
         pnImageLayout.setHorizontalGroup(
             pnImageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnImageLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblImage, javax.swing.GroupLayout.DEFAULT_SIZE, 675, Short.MAX_VALUE)
-                .addContainerGap())
+            .addGap(0, 695, Short.MAX_VALUE)
         );
         pnImageLayout.setVerticalGroup(
             pnImageLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnImageLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblImage, javax.swing.GroupLayout.DEFAULT_SIZE, 582, Short.MAX_VALUE)
-                .addContainerGap())
+            .addGap(0, 588, Short.MAX_VALUE)
         );
 
         jTabbedPane.addTab("Screen Images", pnImage);
 
+        cbAutoLoad.setText("Auto load");
+
+        btnPaste.setText("Paste");
+        btnPaste.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPasteActionPerformed(evt);
+            }
+        });
+
+        cbAutoPrint.setText("Auto Print");
+        cbAutoPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbAutoPrintActionPerformed(evt);
+            }
+        });
+
+        printTimer.setToolTipText("Number of shots per second");
+        printTimer.setValue(1);
+        printTimer.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                printTimerStateChanged(evt);
+            }
+        });
+
+        cbHideWindow.setText("Hide on print");
+
+        btnPrint.setText("Print and Save");
+        btnPrint.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintActionPerformed(evt);
+            }
+        });
+
         cbQuality.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%" }));
         cbQuality.setToolTipText("Image quality");
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+        btnClear.setText("Clear");
+        btnClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout pnBottomBarLayout = new javax.swing.GroupLayout(pnBottomBar);
+        pnBottomBar.setLayout(pnBottomBarLayout);
+        pnBottomBarLayout.setHorizontalGroup(
+            pnBottomBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnBottomBarLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(cbAutoLoad)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -223,17 +225,15 @@ public class Window extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(btnClear)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addComponent(jTabbedPane)
         );
 
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnPaste, btnPrint});
+        pnBottomBarLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {btnPaste, btnPrint});
 
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 632, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+        pnBottomBarLayout.setVerticalGroup(
+            pnBottomBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnBottomBarLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(pnBottomBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cbAutoLoad)
                     .addComponent(btnPaste)
                     .addComponent(btnPrint)
@@ -243,6 +243,21 @@ public class Window extends javax.swing.JFrame {
                     .addComponent(printTimer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cbQuality, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jTabbedPane)
+            .addComponent(pnBottomBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jTabbedPane)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(pnBottomBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
@@ -287,6 +302,16 @@ public class Window extends javax.swing.JFrame {
         timer.start();
 
     }//GEN-LAST:event_printTimerStateChanged
+
+    private void formWindowStateChanged(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowStateChanged
+        repaintLastImage();
+    }//GEN-LAST:event_formWindowStateChanged
+
+    private void repaintLastImage() {
+        if (lastIcon != null) {
+            createIcon(lastIcon);
+        }
+    }
 
     private void print() throws HeadlessException {
         if (robo != null) {
@@ -376,23 +401,42 @@ public class Window extends javax.swing.JFrame {
         final int h = image.getHeight();
 
         //new width and height
-        int nw = lblImage.getWidth();
-        int nh = lblImage.getHeight();
+        int nw = pnImage.getWidth();
+        int nh = pnImage.getHeight();
 
         if (w > h) {
             nh = h * nw / w;
         } else {
             nw = w * nh / h;
         }
-        
-        BufferedImage resizeImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-        Graphics g = resizeImage.createGraphics();
-        g.drawImage(image, 0, 0, nw, nh, null);
+
+        lastIcon = image;
+
+        Image temp = image.getScaledInstance(nw, nh, Image.SCALE_SMOOTH);
+        BufferedImage buffer = new BufferedImage(nw, nh, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics g = buffer.createGraphics();
+        g.drawImage(temp, 0, 0, null);
         g.dispose();
 
-        final ImageIcon ico = new ImageIcon(resizeImage);
-        images.add(ico);
-        lblImage.setIcon(ico);
+        //images.add(new ImageIcon(image));
+        icon = new ImageIcon(buffer);
+        pnImage.repaint();
+    }
+
+    private JPanel createPanel() {
+        return new JPanel() {
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+
+                if (icon != null) {
+                    g.drawImage(icon.getImage(), 0, 0, null);
+                }
+            }
+
+        };
     }
 
     private void pasteImage(BufferedImage image) {
@@ -457,7 +501,7 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JCheckBox cbHideWindow;
     private javax.swing.JComboBox cbQuality;
     private javax.swing.JTabbedPane jTabbedPane;
-    private javax.swing.JLabel lblImage;
+    private javax.swing.JPanel pnBottomBar;
     private javax.swing.JPanel pnImage;
     private javax.swing.JPanel pnText;
     private javax.swing.JSpinner printTimer;

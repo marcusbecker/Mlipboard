@@ -17,7 +17,6 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +53,9 @@ public class Window extends javax.swing.JFrame {
     private ImageIcon icon;
     private BufferedImage lastIcon;
 
+    private static final String IMAGEM_EXT = ".jpg";
+    private static final String IMAGEM_NOME = "imagem_%d.jpg";
+
     private static final List<ImageIcon> images = new ArrayList<>(20);
 
     /**
@@ -71,13 +73,15 @@ public class Window extends javax.swing.JFrame {
 
         Integer val = (Integer) printTimer.getValue();
 
-        timer = new Timer(val, new ActionListener() {
+        try {
+            count = new File(".").listFiles((File pathname) -> pathname.isFile() && pathname.getName().endsWith(IMAGEM_EXT)).length + 1;
+        } catch (Exception ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        }
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (cbAutoPrint.isSelected()) {
-                    print();
-                }
+        timer = new Timer(val, (ActionEvent e) -> {
+            if (cbAutoPrint.isSelected()) {
+                print();
             }
         });
         timer.start();
@@ -369,7 +373,7 @@ public class Window extends javax.swing.JFrame {
     private void pasteImageCompressed(BufferedImage image) {
         createIcon(image);
 
-        final File fImg = new File("imagem_" + count + ".jpg");
+        final File fImg = new File(String.format(IMAGEM_NOME, count));
 
         try {
             String val = cbQuality.getSelectedItem().toString().replaceAll("%", "");
@@ -386,7 +390,7 @@ public class Window extends javax.swing.JFrame {
             writer.dispose();
             fios.close();
 
-            count++;
+            ++count;
             taResult.append("\nImagem salva em: " + fImg.getAbsolutePath());
 
         } catch (IOException ex) {
@@ -442,10 +446,10 @@ public class Window extends javax.swing.JFrame {
     private void pasteImage(BufferedImage image) {
         createIcon(image);
 
-        File fImg = new File("imagem_" + count + ".jpg");
+        File fImg = new File(String.format(IMAGEM_NOME, count));
         try {
             ImageIO.write(image, "jpg", fImg);
-            count++;
+            ++count;
             taResult.append("\nImagem salva em: " + fImg.getAbsolutePath());
 
         } catch (IOException ex) {
@@ -462,32 +466,32 @@ public class Window extends javax.swing.JFrame {
         } else {
 
             taResult.append("Caminho completo com ';':\n");
-            for (File f : files) {
+            files.forEach((File f) -> {
                 taResult.append(f.getAbsolutePath());
                 taResult.append(";");
-            }
+            });
 
             taResult.append("\nNomes com ';':\n");
 
-            for (File f : files) {
+            files.forEach((File f) -> {
                 taResult.append(f.getName());
                 taResult.append(";");
-            }
+            });
 
             taResult.append("\n");
             taResult.append("\nCaminho completo:\n");
 
-            for (File f : files) {
+            files.forEach((File f) -> {
                 taResult.append(f.getAbsolutePath());
                 taResult.append("\n");
-            }
+            });
 
             taResult.append("\nNomes:\n");
 
-            for (File f : files) {
+            files.forEach((File f) -> {
                 taResult.append(f.getName());
                 taResult.append("\n");
-            }
+            });
         }
     }
 
